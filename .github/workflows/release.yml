@@ -25,7 +25,6 @@ jobs:
       run: |
         git branch -d upm &> /dev/null || echo upm branch not found
         git checkout -b upm
-        fi
         git push -f -u origin upm
     - name: Create upm git tag
       if: steps.semantic.outputs.new_release_published == 'true'
