@@ -2,7 +2,7 @@
   "name": "com.speckle.objects",
   "version": "2.5.2",
   "displayName": "Speckle Objects",
-  "description": "AEC Interoperability for Unity through Speckle",
+  "description": "Package for bringing Speckle Core and Objects into Unity",
   "unity": "2020.3",
   "documentationUrl": "https://speckle.guide/user/unity.html",
   "changelogUrl": "https://speckle.notion.site/Public-Changelog-45cb90c7514642ffab2e72d0288e4071",
