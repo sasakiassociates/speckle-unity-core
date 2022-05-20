@@ -1,6 +1,6 @@
 {
   "name": "com.speckle.objects",
-  "version": "2.5.2",
+  "version": "1.0.0",
   "displayName": "Speckle Objects",
   "description": "Package for bringing Speckle Core and Objects into Unity",
   "unity": "2020.3",
