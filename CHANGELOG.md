@@ -1,3 +1,10 @@
+## [1.0.2](https://github.com/sasakiassociates/speckle-unity-core/compare/v1.0.1...v1.0.2) (2022-05-24)
+
+
+### Bug Fixes
+
+* imported objects from main repo ([07995ea](https://github.com/sasakiassociates/speckle-unity-core/commit/07995ea39cb07599dc22d7dce7358cd3dff00bae))
+
 ## [1.0.1](https://github.com/sasakiassociates/speckle-unity-core/compare/v1.0.0...v1.0.1) (2022-05-24)
 
 ### Bug Fixes
