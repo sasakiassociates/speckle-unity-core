@@ -1,3 +1,10 @@
+## [1.0.4](https://github.com/sasakiassociates/speckle-unity-core/compare/v1.0.3...v1.0.4) (2022-05-26)
+
+
+### Bug Fixes
+
+* adding tests for operation calls ([1262439](https://github.com/sasakiassociates/speckle-unity-core/commit/1262439de3fdaa1b8d9aff9f214a79c24161f484))
+
 ## [1.0.3](https://github.com/sasakiassociates/speckle-unity-core/compare/v1.0.2...v1.0.3) (2022-05-24)
 
 
