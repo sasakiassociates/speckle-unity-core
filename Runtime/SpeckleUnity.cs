@@ -1,7 +1,12 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 using Speckle.Core.Kits;
 using UnityEngine;
+
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 namespace Speckle.ConnectorUnity
 {
@@ -28,5 +33,19 @@ namespace Speckle.ConnectorUnity
 				Debug.LogWarning(title + message);
 			}
 		}
+
+		#if UNITY_EDITOR
+		public static List<T> GetAllInstances<T>() where T : ScriptableObject
+		{
+			var guids = AssetDatabase.FindAssets("t:" + typeof(T).Name);
+			var items = new List<T>();
+			foreach (var g in guids)
+			{
+				var path = AssetDatabase.GUIDToAssetPath(g);
+				items.Add(AssetDatabase.LoadAssetAtPath<T>(path));
+			}
+			return items;
+		}
+		#endif
 	}
 }
