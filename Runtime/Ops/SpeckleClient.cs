@@ -5,7 +5,6 @@ using System.Threading;
 using Cysharp.Threading.Tasks;
 using Speckle.ConnectorUnity.Converter;
 using Speckle.Core.Api;
-using UnityEditor;
 using UnityEngine;
 
 namespace Speckle.ConnectorUnity.Ops
@@ -97,9 +96,10 @@ namespace Speckle.ConnectorUnity.Ops
 
 		protected virtual void OnEnable()
 		{
+			
 			// TODO: during the build process this should compile and store these objects. 
 			#if UNITY_EDITOR
-			_converters = GetAllInstances<ScriptableSpeckleConverter>();
+			_converters = SpeckleUnity.GetAllInstances<ScriptableSpeckleConverter>();
 			#endif
 
 			token = this.GetCancellationTokenOnDestroy();
@@ -245,18 +245,6 @@ namespace Speckle.ConnectorUnity.Ops
 			client?.Dispose();
 		}
 
-		#if UNITY_EDITOR
-		public static List<T> GetAllInstances<T>() where T : ScriptableObject
-		{
-			var guids = AssetDatabase.FindAssets("t:" + typeof(T).Name);
-			var items = new List<T>();
-			foreach (var g in guids)
-			{
-				var path = AssetDatabase.GUIDToAssetPath(g);
-				items.Add(AssetDatabase.LoadAssetAtPath<T>(path));
-			}
-			return items;
-		}
-		#endif
+
 	}
 }
