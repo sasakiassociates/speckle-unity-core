@@ -26,7 +26,6 @@ namespace Speckle.ConnectorUnity.Converter
 		public abstract string speckle_type { get; }
 		public abstract string unity_type { get; }
 
-		public abstract string targetType(bool toUnity);
 
 		[Serializable] [HideInInspector]
 		protected readonly struct ComponentInfo
@@ -112,25 +111,23 @@ namespace Speckle.ConnectorUnity.Converter
 				if (comp == null)
 					comp = root.AddComponent<BaseBehaviour>();
 
-				// var props = @base.GetMembers().Where(x => !excludedProps.Contains(x.Key)).ToDictionary(x => x.Key, x => x.Value);
-				comp.properties = new SpeckleProperties();
-				comp.properties.Store(@base, excludedProps);
+				comp.SetProps(@base, excludedProps); 
 			}
 
 			return root;
 		}
 
-		public override Base ToSpeckle(Component component) => CanConvertToSpeckle(component) ? ConvertComponent((TComponent)component) : null;
+		public override Base ToSpeckle(Component component)
+		{
+			return CanConvertToSpeckle(component) ? ConvertComponent((TComponent)component) : null;
+		}
 
-		/// <summary>
-		///   helper function for getting the type associated with speckle or unity
-		/// </summary>
-		/// <param name="toUnity"></param>
-		/// <returns></returns>
-		/// <exception cref="NotImplementedException"></exception>
-		public override string targetType(bool toUnity) => toUnity ? speckle_type : unity_type;
 
-		protected TComponent BuildGo(string goName = null) => new GameObject(string.IsNullOrEmpty(goName) ? speckle_type : goName).AddComponent<TComponent>();
+
+		protected TComponent BuildGo(string goName = null)
+		{
+			return new GameObject(string.IsNullOrEmpty(goName) ? speckle_type : goName).AddComponent<TComponent>();
+		}
 	}
 
 }

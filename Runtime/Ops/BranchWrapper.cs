@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Speckle.Core.Api;
 
-namespace Speckle.ConnectorUnity
+namespace Speckle.ConnectorUnity.Ops
 {
 	[Serializable]
 	public class BranchWrapper

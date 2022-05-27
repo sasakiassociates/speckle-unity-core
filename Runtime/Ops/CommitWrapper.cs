@@ -1,7 +1,7 @@
 ﻿using System;
 using Speckle.Core.Api;
 
-namespace Speckle.ConnectorUnity
+namespace Speckle.ConnectorUnity.Ops
 {
 	[Serializable]
 	public class CommitWrapper

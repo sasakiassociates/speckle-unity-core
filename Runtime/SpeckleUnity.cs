@@ -11,14 +11,13 @@ namespace Speckle.ConnectorUnity
 
 		public const string NameSpace = "Speckle";
 
-
 		public static class Console
 		{
 			public const string title = "speckle-connector:";
 
 			public static void Log(string msg)
 			{
-				Debug.Log(title + msg);
+				Debug.Log(title + " " + msg);
 			}
 			public static void Exception(Exception exception)
 			{

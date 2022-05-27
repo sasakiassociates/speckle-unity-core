@@ -1,59 +1,60 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Threading;
 using Cysharp.Threading.Tasks;
 using Speckle.ConnectorUnity.Converter;
 using Speckle.Core.Api;
-using UnityEngine;
-#if UNITY_EDITOR
 using UnityEditor;
-#endif
+using UnityEngine;
 
-namespace Speckle.ConnectorUnity
+namespace Speckle.ConnectorUnity.Ops
 {
 	public interface IveMadeProgress
 	{
 		public float progress { get; set; }
 	}
 
-	public interface ISpeckleClient
+	public interface ISpeckleInstance : ISpeckleStream, ISpeckleClient, IveMadeProgress
+	{
+		public UniTask<bool> SetStream(SpeckleStream stream);
+
+	}
+
+	public interface ISpeckleStream
 	{
 		public SpeckleStream stream { get; }
 		public Branch branch { get; }
+		public Commit commit { get; }
 		public List<Branch> branches { get; }
-		public ClientCache cache { get; }
-		public UniTask<bool> SetStream(SpeckleStream stream);
+		public List<Commit> commits { get; }
 	}
 
-	[Serializable]
-	public class ClientCache
+	public interface ISpeckleClient
 	{
-
+		public Client client { get; }
+		public CancellationToken token { get; }
 	}
+	
 
 	// BUG: issue with refreshing object data to editor, probably something with serializing the branch or commit data  
-	public abstract class SpeckleClient : MonoBehaviour, ISpeckleClient, IveMadeProgress
+	public abstract class SpeckleClient : MonoBehaviour, ISpeckleInstance, IveMadeProgress
 	{
 
-		[SerializeField] protected GameObject _root;
+		[SerializeField] protected SpeckleNode _root;
 		[SerializeField] protected SpeckleStream _stream;
 		[SerializeField] protected List<ScriptableSpeckleConverter> _converters;
 
 		[SerializeField] private float progressAmount;
 
-		[SerializeField] [HideInInspector]
-		private ClientCache _cache;
-
 		public int branchIndex;
 		public int converterIndex;
-		
+
 		private List<Branch> _branches = new List<Branch>();
 
 		/// <summary>
 		///   a disposable speckle client that we use to access speckly things
 		/// </summary>
-		protected Client client;
-
 		/// <summary>
 		///   an internal toggle to use with uni-task commands
 		/// </summary>
@@ -101,6 +102,7 @@ namespace Speckle.ConnectorUnity
 			_converters = GetAllInstances<ScriptableSpeckleConverter>();
 			#endif
 
+			token = this.GetCancellationTokenOnDestroy();
 			onTotalChildrenCountKnown = i => totalChildCount = i;
 
 			SetStream(stream).Forget();
@@ -126,11 +128,16 @@ namespace Speckle.ConnectorUnity
 		{
 			get => branches.Valid(branchIndex) ? branches[branchIndex] : null;
 		}
+		public Commit commit { get; protected set; }
 		public List<Branch> branches
 		{
 			get => _branches.Valid() ? _branches : new List<Branch>();
 			protected set => _branches = value;
 		}
+		public List<Commit> commits { get; protected set; }
+		public Client client { get; protected set; }
+
+		public CancellationToken token { get; protected set; }
 
 		/// <summary> Necessary setup for interacting with a speckle stream from unity </summary>
 		/// <param name="newStream">root stream object to use, will default to editor field</param>
@@ -144,8 +151,6 @@ namespace Speckle.ConnectorUnity
 				return false;
 			}
 
-			cache = new ClientCache();
-
 			await LoadStream();
 
 			SetSubscriptions();
@@ -153,15 +158,6 @@ namespace Speckle.ConnectorUnity
 			onRepaint?.Invoke();
 
 			return client != null;
-		}
-
-		/// <summary>
-		///   Temporary client data that stores simple interfacing data
-		/// </summary>
-		public ClientCache cache
-		{
-			get => _cache;
-			protected set => _cache = value;
 		}
 
 		public float progress

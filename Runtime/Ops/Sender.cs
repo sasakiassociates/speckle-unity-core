@@ -10,7 +10,7 @@ using Speckle.Core.Transports;
 using UnityEngine;
 using UnityEngine.Events;
 
-namespace Speckle.ConnectorUnity
+namespace Speckle.ConnectorUnity.Ops
 {
 
 	/// <summary>
@@ -21,13 +21,12 @@ namespace Speckle.ConnectorUnity
 	[ExecuteAlways]
 	public class Sender : SpeckleClient
 	{
-		[SerializeField] private List<GameObject> objectsToSend;
 
 		public UnityAction<string> onDataSent;
 
 		private ServerTransport transport;
 
-		public async UniTask<string> Send(List<GameObject> objs = null, string message = null, CancellationTokenSource cancellationToken = null)
+		public async UniTask<string> Send(SpeckleNode obj, string message = null, CancellationTokenSource cancellationToken = null)
 		{
 			var objectId = "";
 
@@ -35,28 +34,15 @@ namespace Speckle.ConnectorUnity
 				return objectId;
 
 			// TODO: This feels pretty silly. It should be something similar to the way selections are made in rhino or revit.
-			if (objs == null || !objs.Any())
-			{
-				SpeckleUnity.Console.Log("No objects were passed to the sender - checking others");
+			SpeckleUnity.Console.Log("No objects were passed to the sender - checking others");
 
-				if (objectsToSend.Valid())
-				{
-					SpeckleUnity.Console.Log("Using objects in editor list");
-					objs = objectsToSend;
-				}
-				else if (_root != null)
-				{
-					SpeckleUnity.Console.Log($"Using the root object with {_root.transform.childCount} kids");
-					objs = new List<GameObject>() { _root };
-				}
-				else
-				{
-					SpeckleUnity.Console.Warn("No objects were found to send! Stopping call");
-					return objectId;
-				}
+			if (_root == null)
+			{
+				SpeckleUnity.Console.Warn("No objects were found to send! Stopping call");
+				return objectId;
 			}
 
-			var data = objs.Count > 1 ? ConvertRecursively(objs) : ConvertRecursively(objs[0]);
+			var data = ConvertRecursively(_root.gameObject);
 
 			try
 			{
@@ -98,7 +84,8 @@ namespace Speckle.ConnectorUnity
 				await UniTask.Yield();
 			}
 
-			catch (SpeckleException e)
+			catch
+				(SpeckleException e)
 			{
 				SpeckleUnity.Console.Exception(e);
 			}

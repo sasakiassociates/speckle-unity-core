@@ -7,7 +7,7 @@ using Speckle.Core.Credentials;
 using UnityEngine;
 using UnityEngine.Networking;
 
-namespace Speckle.ConnectorUnity
+namespace Speckle.ConnectorUnity.Ops
 {
 	[Serializable]
 	public struct MetaData
