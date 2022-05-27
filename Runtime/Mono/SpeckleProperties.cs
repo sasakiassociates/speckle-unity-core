@@ -3,18 +3,19 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Linq;
+using Cysharp.Threading.Tasks;
 using Speckle.Core.Api;
 using Speckle.Core.Models;
 using UnityEngine;
 
 namespace Speckle.ConnectorUnity.Mono
 {
-  /// <summary>
-  ///   This class gets attached to GOs and is used to store Speckle's metadata when sending / receiving
-  /// </summary>
-  [Serializable]
-	public class SpeckleProperties 
-	  // ISerializationCallbackReceiver
+	/// <summary>
+	///   This class gets attached to GOs and is used to store Speckle's metadata when sending / receiving
+	/// </summary>
+	[Serializable]
+	public class SpeckleProperties
+		// ISerializationCallbackReceiver
 	{
 
 		[SerializeField] [HideInInspector]
@@ -56,7 +57,7 @@ namespace Speckle.ConnectorUnity.Mono
 			_hasChanged = false;
 		}
 
-		public void Store(Base @base, HashSet<string> excludedProps = null)
+		public void Store(Base @base, HashSet<string> excludedProps)
 		{
 			_serializedData = Operations.Serialize(@base);
 			Data = @base.GetMembers().Where(x => !excludedProps.Contains(x.Key)).ToDictionary(x => x.Key, x => x.Value);
