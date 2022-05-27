@@ -1,3 +1,10 @@
+## [1.0.5](https://github.com/sasakiassociates/speckle-unity-core/compare/v1.0.4...v1.0.5) (2022-05-27)
+
+
+### Bug Fixes
+
+* receiving client commands ([d13784f](https://github.com/sasakiassociates/speckle-unity-core/commit/d13784fc1611e94c9527296f0aeebbf50b4dd352))
+
 ## [1.0.4](https://github.com/sasakiassociates/speckle-unity-core/compare/v1.0.3...v1.0.4) (2022-05-26)
 
 
