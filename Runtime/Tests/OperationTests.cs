@@ -1,18 +1,13 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using System.Threading;
 using Cysharp.Threading.Tasks;
-using Speckle.ConnectorUnity.Mono;
 using Speckle.Core.Api;
 using Speckle.Core.Credentials;
 using Speckle.Core.Logging;
 using Speckle.Core.Models;
 using Speckle.Core.Serialisation;
 using Speckle.Core.Transports;
-using Speckle.Newtonsoft.Json;
 using UnityEngine;
 using Debug = UnityEngine.Debug;
 
@@ -61,7 +56,7 @@ namespace Speckle.ConnectorUnity
 			Debug.Log("Completed Commit-" + watch.Elapsed);
 
 			await SpeckleGet(commit.referencedObject, token, new ServerTransport(AccountManager.GetDefaultAccount(), stream.stream));
-			
+
 			// await GetObject(client, commit.referencedObject, stream, token);
 
 			client.Dispose();
@@ -94,13 +89,13 @@ namespace Speckle.ConnectorUnity
 		public async UniTask Receive()
 		{
 			Debug.Log("Empty Call Started");
-			
+
 			var watch = Stopwatch.StartNew();
 
 			await UniTask.Delay(1000);
-			
+
 			watch.Stop();
-			
+
 			Debug.Log("Delay Done" + watch.Elapsed);
 
 			await UniTask.Yield();
@@ -160,7 +155,7 @@ namespace Speckle.ConnectorUnity
 
 		public void OnGUI()
 		{
-			if (GUI.Button(new Rect(10f, 40f, 100f, 20f), "Speckle Test") && !isWorking)
+			if (UnityEngine.GUI.Button(new Rect(10f, 40f, 100f, 20f), "Speckle Test") && !isWorking)
 			{
 				Debug.Log($"Processor Count {Environment.ProcessorCount}");
 				TaskPool.SetMaxPoolSize(3);
@@ -168,7 +163,7 @@ namespace Speckle.ConnectorUnity
 				// UniTask.WhenAll(ChainedCommand(Carlos));
 				ChainedCommand(Carlos).Forget();
 			}
-			if (GUI.Button(new Rect(10f, 70f, 100f, 20f), "Empty Test") && !isWorking)
+			if (UnityEngine.GUI.Button(new Rect(10f, 70f, 100f, 20f), "Empty Test") && !isWorking)
 			{
 				TaskPool.SetMaxPoolSize(Environment.ProcessorCount);
 				isWorking = true;

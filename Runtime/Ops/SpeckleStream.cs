@@ -172,7 +172,7 @@ namespace Speckle.ConnectorUnity.Ops
 				SpeckleUnity.Console.Log("Invalid input for stream");
 				return false;
 			}
-
+			
 			id = _wrapper.StreamId;
 			commitId = _wrapper.CommitId;
 			objectId = _wrapper.ObjectId;

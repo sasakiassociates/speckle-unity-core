@@ -65,7 +65,21 @@ namespace Speckle.ConnectorUnity
 			return @base != null;
 		}
 
-		public static SpeckleLayer ListToLayer(
+		public static void ConvertToLayer(this SpeckleLayer layer, Base obj, ISpeckleConverter converter)
+		{
+			if (converter.ConvertToNative(obj) is GameObject o)
+				layer.Add(o);
+			else
+				Debug.Log("Did not convert correctly");
+		}
+
+		public static void ConvertToLayer(this SpeckleLayer layer, object obj, ISpeckleConverter converter)
+		{
+			if (obj.IsBase(out var @base))
+				ConvertToLayer(layer, @base, converter);
+		}
+		
+		 public static SpeckleLayer ListToLayer(
 			string member,
 			IEnumerable<object> data,
 			ISpeckleConverter converter,
@@ -74,8 +88,7 @@ namespace Speckle.ConnectorUnity
 			Action<string> onError = null
 		)
 		{
-			var layer = new SpeckleLayer(member);
-			var layerObj = new GameObject($"Layer:{member}");
+			var layer = new GameObject(member).AddComponent<SpeckleLayer>();
 
 			foreach (var item in data)
 			{
@@ -95,7 +108,7 @@ namespace Speckle.ConnectorUnity
 				else if (item.IsList())
 				{
 					var list = ((IEnumerable)item).Cast<object>().ToList();
-					var childLayer = ListToLayer(list.Count.ToString(), list, converter, token, layerObj.transform, onError);
+					var childLayer = ListToLayer(list.Count.ToString(), list, converter, token, layer.transform, onError);
 					layer.Add(childLayer);
 				}
 				else
@@ -103,9 +116,9 @@ namespace Speckle.ConnectorUnity
 			}
 
 			if (parent != null)
-				layerObj.transform.SetParent(parent);
+				layer.transform.SetParent(parent);
 
-			layer.SetParent(layerObj.transform);
+			layer.SetObjectParent(layer.transform);
 
 			return layer;
 		}

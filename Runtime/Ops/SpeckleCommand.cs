@@ -39,17 +39,7 @@ namespace Speckle.ConnectorUnity.Ops
 			});
 		}
 
-		/// <summary>
-		///   helper function for getting the type associated with speckle or unity
-		/// </summary>
-		/// <param name="converter"></param>
-		/// <param name="toUnity"></param>
-		/// <returns></returns>
-		/// <exception cref="NotImplementedException"></exception>
-		public static string targetType(this IComponentConverter converter, bool toUnity)
-		{
-			return toUnity ? converter.speckle_type : converter.unity_type;
-		}
+	
 
 		public static async UniTask<Base> GetCommitData(SpeckleStream stream, Client client, CancellationToken token)
 		{

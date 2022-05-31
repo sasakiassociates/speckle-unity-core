@@ -36,11 +36,7 @@ namespace Speckle.ConnectorUnity.Ops
 		}
 
 		public List<Commit> Commits { get; protected set; }
-
-		public string StreamUrl
-		{
-			get => stream == null || !stream.IsValid() ? "no stream" : stream.GetUrl(false);
-		}
+		
 
 		public Commit activeCommit
 		{

@@ -27,6 +27,7 @@ namespace Speckle.ConnectorUnity.Ops
 		public Commit commit { get; }
 		public List<Branch> branches { get; }
 		public List<Commit> commits { get; }
+		public string StreamUrl { get; }
 	}
 
 	public interface ISpeckleClient
@@ -34,7 +35,6 @@ namespace Speckle.ConnectorUnity.Ops
 		public Client client { get; }
 		public CancellationToken token { get; }
 	}
-	
 
 	// BUG: issue with refreshing object data to editor, probably something with serializing the branch or commit data  
 	public abstract class SpeckleClient : MonoBehaviour, ISpeckleInstance, IveMadeProgress
@@ -96,7 +96,6 @@ namespace Speckle.ConnectorUnity.Ops
 
 		protected virtual void OnEnable()
 		{
-			
 			// TODO: during the build process this should compile and store these objects. 
 			#if UNITY_EDITOR
 			_converters = SpeckleUnity.GetAllInstances<ScriptableSpeckleConverter>();
@@ -128,13 +127,23 @@ namespace Speckle.ConnectorUnity.Ops
 		{
 			get => branches.Valid(branchIndex) ? branches[branchIndex] : null;
 		}
+
 		public Commit commit { get; protected set; }
+
 		public List<Branch> branches
 		{
 			get => _branches.Valid() ? _branches : new List<Branch>();
 			protected set => _branches = value;
 		}
+
 		public List<Commit> commits { get; protected set; }
+
+		public string StreamUrl
+		{
+			get => stream == null || !stream.IsValid() ? "no stream" : stream.GetUrl(false);
+
+		}
+
 		public Client client { get; protected set; }
 
 		public CancellationToken token { get; protected set; }
@@ -244,7 +253,6 @@ namespace Speckle.ConnectorUnity.Ops
 		{
 			client?.Dispose();
 		}
-
 
 	}
 }

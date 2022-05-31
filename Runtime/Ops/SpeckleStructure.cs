@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace Speckle.ConnectorUnity.Ops
 {
@@ -9,12 +10,9 @@ namespace Speckle.ConnectorUnity.Ops
 		public SpeckleStructure()
 		{
 			layers = new List<SpeckleLayer>();
-			global = new SpeckleLayer();
 		}
 
 		public List<SpeckleLayer> layers;
-
-		public SpeckleLayer global;
 		
 		public void Add(SpeckleLayer layer)
 		{
