@@ -1,54 +1,15 @@
-﻿using System;
+﻿using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
 using Cysharp.Threading.Tasks;
 using Speckle.ConnectorUnity.Mono;
+using Speckle.Core.Kits;
 using Speckle.Core.Models;
 using UnityEngine;
 
 namespace Speckle.ConnectorUnity.Ops
 {
-
-	/// <summary>
-	/// not really sure what this will be, but I think it would be helpful to have an object that mimics the container objects of speckle. 
-	/// </summary>
-	[Serializable]
-	internal class SpeckleLayer
-	{
-
-		[SerializeField] private string name;
-		[SerializeField] private Transform parent;
-		[SerializeField] private List<GameObject> data;
-
-		public SpeckleLayer()
-		{ }
-
-		public SpeckleLayer(string name)
-		{
-			this.name = name;
-			data = new List<GameObject>();
-		}
-
-		public void Parent(Transform t)
-		{
-			parent = t;
-		}
-
-		public void Add(object @object)
-		{ }
-
-	}
-
-	[Serializable]
-	internal class SpeckleStructure
-	{
-		public SpeckleStructure()
-		{
-			layers = new List<SpeckleLayer>();
-		}
-		
-		public List<SpeckleLayer> layers;
-
-	}
 
 	/// <summary>
 	/// A speckle node is pretty much the reference object that is first pulled from a commit
@@ -57,18 +18,27 @@ namespace Speckle.ConnectorUnity.Ops
 	{
 
 		[SerializeField] private string id;
-		[SerializeField] private string appId;
-		[SerializeField] private int childCount;
-
-		[SerializeField] private SpeckleStructure data;
 
 		/// <summary>
 		/// Reference object id
 		/// </summary>
 		public string Id => id;
+
+		[SerializeField] private string appId;
+
+		/// <summary>
+		/// Reference to application ID
+		/// </summary>
 		public string AppId => appId;
 
+		[SerializeField] private int childCount;
+
+		/// <summary>
+		/// Total child count 
+		/// </summary>
 		public int ChildCount => childCount;
+
+		[SerializeField] private SpeckleStructure hierarchy;
 
 		public override void SetProps(Base @base, HashSet<string> props = null)
 		{
@@ -80,48 +50,71 @@ namespace Speckle.ConnectorUnity.Ops
 			_properties.Store(@base, props ?? excludedProps);
 		}
 
-		public void CreateHierarchy(Base @base)
+		/// <summary>
+		/// Setup the hierarchy for the commit coming in
+		/// </summary>
+		/// <param name="data">The object to convert</param>
+		/// <param name="converter">Speckle Converter to parse objects with</param>
+		/// <param name="token">Cancellation token</param>
+		/// <returns></returns>
+		public UniTask DataToScene(Base data, ISpeckleConverter converter, CancellationToken token)
 		{
-			foreach (var n in @base.GetDynamicMemberNames())
-				Debug.Log($"dynamic:{n}");
+			id = data.id;
+			appId = data.applicationId;
+			childCount = (int)data.totalChildrenCount;
+			name = $"Node: {id}";
 
-			// TODO: check if there are layers or if this is just a single object
+			hierarchy = new SpeckleStructure();
 
-			data = new SpeckleStructure();
-
-			// check if there are layers in the ref object
-			foreach (var member in @base.GetDynamicMembers())
+			if (converter == null)
 			{
-				Debug.Log($"dynamic member:{member}");
-				var layer = new SpeckleLayer(member);
-				layer.Add(@base[member]);
-				data.layers.Add(layer);
+				SpeckleUnity.Console.Warn("No valid converter to use during conversion ");
+				return UniTask.CompletedTask;
 			}
 
-			foreach (var n in @base.GetInstanceMembersNames())
-				Debug.Log($"instance:{n}");
+			// if the commit contains no lists or trees
+			if (converter.CanConvertToNative(data))
+				ConvertToLayer(hierarchy.global, data, converter);
+			else
+			{
+				// check if there are layers in the ref object
+				foreach (var member in data.GetMemberNames())
+				{
+					var obj = data[member];
 
-			foreach (var n in @base.GetInstanceMembers())
-				Debug.Log($"instance member:{n}");
-		}
+					if (!obj.IsList())
+					{
+						// if the object is a regular speckle object it gets added to the general layer 
+						ConvertToLayer(hierarchy.global, obj, converter);
+						continue;
+					}
 
-		public UniTask Set(Base @base)
-		{
-			id = @base.id;
-			appId = @base.applicationId;
-			childCount = (int)@base.totalChildrenCount;
+					// this object is a list with objects inside it 
+					var layer = SpeckleUnity.ListToLayer(member, ((IEnumerable)obj).Cast<object>(), converter, token, transform, Debug.Log);
 
-			CreateHierarchy(@base);
-
-			// this object will have all the objects within it's properties space
-			// let's take that structure and rebuild it 
+					hierarchy.Add(layer);
+				}
+			}
 
 			return UniTask.CompletedTask;
-
-			// TODO: Setting this props is too much and doesn't really get used properly yet. 
-			// _properties = new SpeckleProperties();
-			// _properties.Store(@base, excludedProps);
 		}
+
+		private static void ConvertToLayer(SpeckleLayer layer, Base obj, ISpeckleConverter converter)
+		{
+			if (converter.ConvertToNative(obj) is GameObject o)
+				layer.Add(o);
+			else
+				Debug.Log("Did not convert correctly");
+		}
+
+		private static void ConvertToLayer(SpeckleLayer layer, object obj, ISpeckleConverter converter)
+		{
+			if (obj.IsBase(out var @base))
+				ConvertToLayer(layer, @base, converter);
+		}
+
+		public void SceneToData()
+		{ }
 
 	}
 }
