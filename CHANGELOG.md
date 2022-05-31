@@ -1,3 +1,10 @@
+## [1.0.6](https://github.com/sasakiassociates/speckle-unity-core/compare/v1.0.5...v1.0.6) (2022-05-31)
+
+
+### Bug Fixes
+
+* basic support for sending ([5f1aec3](https://github.com/sasakiassociates/speckle-unity-core/commit/5f1aec3fadf2ec946da223fded35213cf5bb5f6d))
+
 ## [1.0.5](https://github.com/sasakiassociates/speckle-unity-core/compare/v1.0.4...v1.0.5) (2022-05-27)
 
 
