@@ -1,9 +1,9 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using Cysharp.Threading.Tasks;
-using Speckle.ConnectorUnity.Mono;
 using Speckle.Core.Kits;
 using Speckle.Core.Models;
 using UnityEngine;
@@ -14,24 +14,28 @@ namespace Speckle.ConnectorUnity.Ops
 	/// <summary>
 	/// A speckle node is pretty much the reference object that is first pulled from a commit
 	/// </summary>
-	public class SpeckleNode : BaseBehaviour
+	[AddComponentMenu("Speckle/Node")]
+	public class SpeckleNode : MonoBehaviour
 	{
 
-		[SerializeField] private string id;
+		[SerializeField, HideInInspector]
+		private string id;
 
 		/// <summary>
 		/// Reference object id
 		/// </summary>
 		public string Id => id;
 
-		[SerializeField] private string appId;
+		[SerializeField, HideInInspector]
+		private string appId;
 
 		/// <summary>
 		/// Reference to application ID
 		/// </summary>
 		public string AppId => appId;
 
-		[SerializeField] private int childCount;
+		[SerializeField, HideInInspector]
+		private int childCount;
 
 		/// <summary>
 		/// Total child count 
@@ -39,16 +43,6 @@ namespace Speckle.ConnectorUnity.Ops
 		public int ChildCount => childCount;
 
 		[SerializeField] private SpeckleStructure hierarchy;
-
-		public override void SetProps(Base @base, HashSet<string> props = null)
-		{
-			id = @base.id;
-			appId = @base.applicationId;
-			childCount = (int)@base.totalChildrenCount;
-
-			_properties = new SpeckleProperties();
-			_properties.Store(@base, props ?? excludedProps);
-		}
 
 		/// <summary>
 		/// Setup the hierarchy for the commit coming in
@@ -65,6 +59,7 @@ namespace Speckle.ConnectorUnity.Ops
 			name = $"Node: {id}";
 
 			hierarchy = new SpeckleStructure();
+			var defaultLayer = new GameObject("Default").AddComponent<SpeckleLayer>();
 
 			if (converter == null)
 			{
@@ -74,7 +69,7 @@ namespace Speckle.ConnectorUnity.Ops
 
 			// if the commit contains no lists or trees
 			if (converter.CanConvertToNative(data))
-				ConvertToLayer(hierarchy.global, data, converter);
+				defaultLayer.ConvertToLayer(data, converter);
 			else
 			{
 				// check if there are layers in the ref object
@@ -85,7 +80,7 @@ namespace Speckle.ConnectorUnity.Ops
 					if (!obj.IsList())
 					{
 						// if the object is a regular speckle object it gets added to the general layer 
-						ConvertToLayer(hierarchy.global, obj, converter);
+						defaultLayer.ConvertToLayer(obj, converter);
 						continue;
 					}
 
@@ -96,25 +91,67 @@ namespace Speckle.ConnectorUnity.Ops
 				}
 			}
 
+			if (defaultLayer.Layers.Any())
+			{
+				defaultLayer.SetObjectParent(transform);
+				hierarchy.Add(defaultLayer);
+			}
+			else
+				SpeckleUnity.SafeDestroy(defaultLayer.gameObject);
+
 			return UniTask.CompletedTask;
 		}
 
-		private static void ConvertToLayer(SpeckleLayer layer, Base obj, ISpeckleConverter converter)
+		public Base SceneToData(ISpeckleConverter converter, CancellationToken token)
 		{
-			if (converter.ConvertToNative(obj) is GameObject o)
-				layer.Add(o);
-			else
-				Debug.Log("Did not convert correctly");
+			var data = new Base();
+
+			foreach (var layer in hierarchy.layers)
+			{
+				if (token.IsCancellationRequested)
+					return data;
+				
+				
+				data[layer.LayerName] = layer.Data.Select(x => ConvertRecursively(x, converter,token)).Where(x => x != null).ToList();
+			}
+
+			return data;
 		}
 
-		private static void ConvertToLayer(SpeckleLayer layer, object obj, ISpeckleConverter converter)
+		private Base ConvertRecursively(GameObject go, ISpeckleConverter converter, CancellationToken token)
 		{
-			if (obj.IsBase(out var @base))
-				ConvertToLayer(layer, @base, converter);
+			if (converter.CanConvertToSpeckle(go))
+				try
+				{
+					return converter.ConvertToSpeckle(go);
+				}
+				catch (Exception e)
+				{
+					Debug.LogException(e);
+				}
+
+			return CheckForChildren(go, converter,token, out var objs) ?
+				new Base { ["objects"] = objs } : null;
 		}
 
-		public void SceneToData()
-		{ }
+		private bool CheckForChildren(GameObject go, ISpeckleConverter converter, CancellationToken token, out List<Base> objs)
+		{
+			objs = new List<Base>();
 
+			if (go != null && go.transform.childCount > 0)
+			{
+				foreach (Transform child in go.transform)
+				{
+					if (token.IsCancellationRequested)
+						return false;
+					
+					var converted = ConvertRecursively(child.gameObject, converter, token);
+					if (converted != null)
+						objs.Add(converted);
+				}
+			}
+
+			return objs.Any();
+		}
 	}
 }

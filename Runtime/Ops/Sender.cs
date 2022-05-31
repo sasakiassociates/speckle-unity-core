@@ -1,11 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using Speckle.Core.Api;
 using Speckle.Core.Logging;
-using Speckle.Core.Models;
 using Speckle.Core.Transports;
 using UnityEngine;
 using UnityEngine.Events;
@@ -22,19 +19,29 @@ namespace Speckle.ConnectorUnity.Ops
 	public class Sender : SpeckleClient
 	{
 
+		[SerializeField] private string commitMessage;
+
 		public UnityAction<string> onDataSent;
 
 		private ServerTransport transport;
 
-		public async UniTask<string> Send(SpeckleNode obj, string message = null, CancellationTokenSource cancellationToken = null)
+		public async UniTask<string> Send(SpeckleNode obj, string message = null, CancellationTokenSource tokenSource = null)
+		{
+			if (obj != null)
+				_root = obj;
+
+			return await Send(message, tokenSource);
+		}
+
+		public async UniTask<string> Send(string message = null, CancellationTokenSource tokenSource = null)
 		{
 			var objectId = "";
 
 			if (!IsReady())
+			{
+				SpeckleUnity.Console.Warn($"{this.name} is not ready");
 				return objectId;
-
-			// TODO: This feels pretty silly. It should be something similar to the way selections are made in rhino or revit.
-			SpeckleUnity.Console.Log("No objects were passed to the sender - checking others");
+			}
 
 			if (_root == null)
 			{
@@ -42,7 +49,9 @@ namespace Speckle.ConnectorUnity.Ops
 				return objectId;
 			}
 
-			var data = ConvertRecursively(_root.gameObject);
+			token = tokenSource?.Token ?? this.GetCancellationTokenOnDestroy();
+
+			var data = _root.SceneToData(converter, token);
 
 			try
 			{
@@ -62,21 +71,22 @@ namespace Speckle.ConnectorUnity.Ops
 
 				Debug.Log($"data sent! {objectId}");
 
-				Debug.Log($"Commit to {stream.BranchName}");
+				Debug.Log($"Commit to {branch.name}");
 
-				var commit = await client.CommitCreate(
+				var commitId = await client.CommitCreate(
 					this.GetCancellationTokenOnDestroy(),
 					new CommitCreateInput()
 					{
 						objectId = objectId,
 						streamId = stream.Id,
-						branchName = stream.BranchName, // TODO: fix how the speckle stream object holds data... 
-						message = message.Valid() ? message : $"Objects from Unity {data.totalChildrenCount}",
+						branchName = branch.name,
+						message = message.Valid() ? message : commitMessage.Valid() ? commitMessage : $"Objects from Unity {data.totalChildrenCount}",
 						sourceApplication = SpeckleUnity.HostApp,
 						totalChildrenCount = (int)data.GetTotalChildrenCount()
 					}).AsUniTask();
 
-				Debug.Log($"commit created! {commit}");
+				//TODO: point to new commit 
+				Debug.Log($"commit created! {commitId}");
 
 				transport?.Dispose();
 				onDataSent?.Invoke(objectId);
@@ -99,54 +109,12 @@ namespace Speckle.ConnectorUnity.Ops
 			transport?.Dispose();
 		}
 
-		#region private methods
-		private Base ConvertRecursively(IEnumerable<GameObject> objs)
-		{
-			return new Base()
-			{
-				["objects"] = objs.Select(ConvertRecursively).Where(x => x != null).ToList()
-			};
-		}
-
 		protected override async UniTask LoadStream()
 		{
 			await base.LoadStream();
+			
 			name = nameof(Sender) + $"-{stream.Id}";
 		}
-
-		private Base ConvertRecursively(GameObject go)
-		{
-			if (converter.CanConvertToSpeckle(go))
-				try
-				{
-					return converter.ConvertToSpeckle(go);
-				}
-				catch (Exception e)
-				{
-					Debug.LogException(e);
-				}
-
-			return CheckForChildren(go, out var objs) ?
-				new Base { ["objects"] = objs } : null;
-		}
-
-		private bool CheckForChildren(GameObject go, out List<Base> objs)
-		{
-			objs = new List<Base>();
-
-			if (go != null && go.transform.childCount > 0)
-			{
-				foreach (Transform child in go.transform)
-				{
-					var converted = ConvertRecursively(child.gameObject);
-					if (converted != null)
-						objs.Add(converted);
-				}
-			}
-
-			return objs.Any();
-		}
-		#endregion
 
 	}
 }

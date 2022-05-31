@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using Speckle.ConnectorUnity.Mono;
 using Speckle.Core.Kits;
+using Speckle.Core.Logging;
 using Speckle.Core.Models;
 using UnityEngine;
 
@@ -20,7 +21,7 @@ namespace Speckle.ConnectorUnity.Converter
 		[Space]
 		[SerializeField] protected List<ComponentConverter> converters;
 
-		protected Dictionary<string, ComponentConverter> compiled;
+		// protected Dictionary<string, ComponentConverter> compiled;
 
 		public HashSet<Exception> ConversionErrors { get; } = new HashSet<Exception>();
 
@@ -51,14 +52,88 @@ namespace Speckle.ConnectorUnity.Converter
 		}
 
 		public abstract Base ConvertToSpeckle(object @object);
-		
+
 		public abstract object ConvertToNative(Base @base);
 
 		public virtual List<Base> ConvertToSpeckle(List<object> objects) => objects.Select(ConvertToSpeckle).ToList();
 
 		public virtual List<object> ConvertToNative(List<Base> objects) => objects.Select(ConvertToNative).ToList();
 
-		public virtual bool CanConvertToSpeckle(object @object) => @object is Component comp && CanConvertToSpeckle(comp);
+		protected bool TryGetConverter(object @object, out Component comp, out IComponentConverter converter)
+		{
+			comp = null;
+			converter = default;
+
+			if (!converters.Any())
+				return false;
+
+			switch (@object)
+			{
+				case GameObject o:
+					foreach (var c in converters)
+					{
+						comp = o.GetComponent(c.unity_type);
+						if (comp == null)
+							continue;
+
+						converter = c;
+						break;
+					}
+					break;
+
+				case Component o:
+					comp = o;
+					foreach (var c in converters)
+					{
+						if (c.unity_type != comp.GetType())
+							continue;
+
+						converter = c;
+						break;
+					}
+
+					break;
+				default:
+					Debug.LogException(new SpeckleException($"Native unity object {@object.GetType()} is not supported"));
+					break;
+			}
+			
+			return converter != default && comp != null;
+		}
+
+		public virtual bool CanConvertToSpeckle(object @object)
+		{
+			if (!converters.Any())
+				return false;
+
+			if (@object is GameObject go)
+			{
+				foreach (var converter in converters)
+				{
+					if (go.GetComponent(converter.unity_type) != null)
+					{
+						Debug.Log($"Found {converter.name} for {converter.unity_type}");
+						return true;
+					}
+				}
+			}
+
+			else if (@object is Component comp)
+			{
+				var type = comp.GetType();
+
+				foreach (var converter in converters)
+				{
+					if (converter.unity_type == type)
+					{
+						Debug.Log($"Found {converter.name} for {converter.unity_type}");
+						return true;
+					}
+				}
+			}
+
+			return false;
+		}
 
 		public virtual bool CanConvertToNative(Base @object)
 		{
@@ -81,7 +156,7 @@ namespace Speckle.ConnectorUnity.Converter
 
 		public virtual bool CanConvertToSpeckle(Component @object)
 		{
-			return converters.Valid()&& converters.Any(x => x.CanConvertToSpeckle(@object));
+			return converters.Valid() && converters.Any(x => x.CanConvertToSpeckle(@object));
 		}
 
 		#region converter properties

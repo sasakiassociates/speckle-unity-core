@@ -1,19 +1,18 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Speckle.Core.Models;
 using UnityEngine;
 
 namespace Speckle.ConnectorUnity.Converter
 {
-	public interface IWantContextObj
-	{
-		public List<ApplicationPlaceholderObject> contextObjects { get; set; }
-	}
 
 	public interface IComponentConverter
 	{
 
 		public string speckle_type { get; }
-		public string unity_type { get; }
+
+		public Type unity_type { get; }
+
 		public bool CanConvertToNative(Base type);
 		public bool CanConvertToSpeckle(Component type);
 
