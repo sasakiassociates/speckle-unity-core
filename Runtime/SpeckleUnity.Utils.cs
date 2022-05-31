@@ -105,7 +105,7 @@ namespace Speckle.ConnectorUnity
 			if (parent != null)
 				layerObj.transform.SetParent(parent);
 
-			layer.Parent(layerObj.transform);
+			layer.SetParent(layerObj.transform);
 
 			return layer;
 		}

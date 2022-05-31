@@ -9,17 +9,30 @@ namespace Speckle.ConnectorUnity.Ops
 	public class SpeckleLayer
 	{
 
+		[SerializeField] private string name;
 		[SerializeField] private Transform parent;
 		[SerializeField] private List<GameObject> data;
-		[SerializeField] private string name;
 		[SerializeField] private List<SpeckleLayer> layers;
 
-		public List<GameObject> Data
-		{
-			get => data.Valid() ? data : new List<GameObject>();
-		}
+		/// <summary>
+		/// Active parent for all layer objects
+		/// </summary>
+		public Transform Parent => parent;
 
-		public string LayerName => this.name;
+		/// <summary>
+		/// Converted object data within layer
+		/// </summary>
+		public List<GameObject> Data => data.Valid() ? data : new List<GameObject>();
+
+		/// <summary>
+		/// Layer Name
+		/// </summary>
+		public string Name => this.name;
+
+		/// <summary>
+		/// Nested Layers
+		/// </summary>
+		public List<SpeckleLayer> Layers => layers.Valid() ? layers : new List<SpeckleLayer>();
 
 		public SpeckleLayer()
 		{
@@ -32,11 +45,14 @@ namespace Speckle.ConnectorUnity.Ops
 			data = new List<GameObject>();
 		}
 
-		public void Parent(Transform t)
+		/// <summary>
+		/// Set parent for all objects in a layer
+		/// </summary>
+		/// <param name="t"></param>
+		public void SetParent(Transform t)
 		{
 			if (t == null)
 				return;
-			
 
 			parent = t;
 
@@ -55,7 +71,6 @@ namespace Speckle.ConnectorUnity.Ops
 			data ??= new List<GameObject>();
 			data.Add(@object);
 		}
-
 
 	}
 }
