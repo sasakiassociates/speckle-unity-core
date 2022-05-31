@@ -5,72 +5,66 @@ using UnityEngine;
 
 namespace Speckle.ConnectorUnity.Ops
 {
-	[Serializable]
-	public class SpeckleLayer
+	public class SpeckleLayer : MonoBehaviour
 	{
 
-		[SerializeField] private string name;
-		[SerializeField] private Transform parent;
-		[SerializeField] private List<GameObject> data;
-		[SerializeField] private List<SpeckleLayer> layers;
+		[SerializeField] private Transform _parent;
+		[SerializeField] private List<GameObject> _data;
+		[SerializeField] private List<SpeckleLayer> _layers;
 
 		/// <summary>
 		/// Active parent for all layer objects
 		/// </summary>
-		public Transform Parent => parent;
+		public Transform Parent => _parent;
 
 		/// <summary>
 		/// Converted object data within layer
 		/// </summary>
-		public List<GameObject> Data => data.Valid() ? data : new List<GameObject>();
+		public List<GameObject> Data => _data.Valid() ? _data : new List<GameObject>();
 
 		/// <summary>
 		/// Layer Name
 		/// </summary>
-		public string Name => this.name;
+		public string LayerName
+		{
+			get => this.name;
+			set => this.name = value;
+		}
 
 		/// <summary>
 		/// Nested Layers
 		/// </summary>
-		public List<SpeckleLayer> Layers => layers.Valid() ? layers : new List<SpeckleLayer>();
-
-		public SpeckleLayer()
-		{
-			data = new List<GameObject>();
-		}
-
-		public SpeckleLayer(string name)
-		{
-			this.name = name;
-			data = new List<GameObject>();
-		}
+		public List<SpeckleLayer> Layers => _layers.Valid() ? _layers : new List<SpeckleLayer>();
+		
 
 		/// <summary>
 		/// Set parent for all objects in a layer
 		/// </summary>
 		/// <param name="t"></param>
-		public void SetParent(Transform t)
+		public void SetObjectParent(Transform t)
 		{
 			if (t == null)
 				return;
 
-			parent = t;
+			_parent = t;
 
 			if (Data.Any())
-				Data.ForEach(x => x.transform.SetParent(parent));
+				Data.ForEach(x => x.transform.SetParent(_parent));
 		}
 
 		public void Add(SpeckleLayer layer)
 		{
-			layers ??= new List<SpeckleLayer>();
-			layers.Add(layer);
+			_layers ??= new List<SpeckleLayer>();
+			_layers.Add(layer);
 		}
 
 		public void Add(GameObject @object)
 		{
-			data ??= new List<GameObject>();
-			data.Add(@object);
+			_data ??= new List<GameObject>();
+			_data.Add(@object);
 		}
 
+		
+		
 	}
 }
