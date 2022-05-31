@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using Speckle.ConnectorUnity.Mono;
 using Speckle.Core.Kits;
 using Speckle.Core.Models;
 using UnityEngine;
@@ -50,6 +51,7 @@ namespace Speckle.ConnectorUnity.Converter
 		}
 
 		public abstract Base ConvertToSpeckle(object @object);
+		
 		public abstract object ConvertToNative(Base @base);
 
 		public virtual List<Base> ConvertToSpeckle(List<object> objects) => objects.Select(ConvertToSpeckle).ToList();

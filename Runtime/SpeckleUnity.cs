@@ -24,10 +24,12 @@ namespace Speckle.ConnectorUnity
 			{
 				Debug.Log(title + " " + msg);
 			}
+			
 			public static void Exception(Exception exception)
 			{
 				Debug.LogException(exception);
 			}
+			
 			public static void Warn(string message)
 			{
 				Debug.LogWarning(title + message);
