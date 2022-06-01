@@ -1,6 +1,8 @@
 # speckle-unity-core
 
-The main client connection for using speckle in unity. This package features: 
+An unoffical client connection for using speckle in unity. This project was started from the main [speckle-unity](https://github.com/specklesystems/speckle-unity) project, but has been moved into different repos for more modular package support with unity.    
+
+This package features: 
 
 - `SpeckleStream` - A scriptable object for storing and accessing speckle streams
 - `Sender` + `Receiver` - the main operation objects that handle interacting with speckle and unity
@@ -20,7 +22,7 @@ This pacakge can be installed with [OpenUpm](https://github.com/openupm/openupm-
 All roadmap information is available in the main package repo, [speckle-unity-connector](https://github.com/sasakiassociates/speckle-unity-connector)  
 
 
-### Additional 
+## Additional 
 There are additional packages in active development.
 
 - Supported objects and conversions 
