@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using Speckle.Core.Kits;
+using Speckle.Core.Logging;
 using Speckle.Core.Models;
 using UnityEngine;
 
@@ -110,31 +111,76 @@ namespace Speckle.ConnectorUnity.Ops
 			{
 				if (token.IsCancellationRequested)
 					return data;
-				
-				
-				data[layer.LayerName] = layer.Data.Select(x => ConvertRecursively(x, converter,token)).Where(x => x != null).ToList();
+
+				data[layer.LayerName] = LayerToBase(layer, converter, token);
 			}
 
 			return data;
 		}
 
-		private Base ConvertRecursively(GameObject go, ISpeckleConverter converter, CancellationToken token)
+		private static Base LayerToBase(SpeckleLayer layer, ISpeckleConverter converter, CancellationToken token)
 		{
-			if (converter.CanConvertToSpeckle(go))
-				try
+			var layerBase = new Base();
+			try
+			{
+				var layerObjects = new List<Base>();
+
+				foreach (var item in layer.Data)
 				{
-					return converter.ConvertToSpeckle(go);
-				}
-				catch (Exception e)
-				{
-					Debug.LogException(e);
+					if (token.IsCancellationRequested)
+						return layerBase;
+
+					var @base = ConvertRecursively(item, converter, token);
+
+					if (@base != null)
+						layerObjects.Add(@base);
 				}
 
-			return CheckForChildren(go, converter,token, out var objs) ?
-				new Base { ["objects"] = objs } : null;
+				layerBase["@Objects"] = layerObjects;
+			}
+
+			catch (SpeckleException e)
+			{
+				SpeckleUnity.Console.Warn(e.Message);
+				return layerBase;
+			}
+
+			try
+			{
+				foreach (var nestedLayer in layer.Layers)
+				{
+					if (token.IsCancellationRequested)
+						return layerBase;
+
+					layerBase[nestedLayer.LayerName] = LayerToBase(nestedLayer, converter, token);
+				}
+			}
+			catch (SpeckleException e)
+			{
+				SpeckleUnity.Console.Warn(e.Message);
+				return layerBase;
+			}
+
+			return layerBase;
 		}
 
-		private bool CheckForChildren(GameObject go, ISpeckleConverter converter, CancellationToken token, out List<Base> objs)
+		private static Base ConvertRecursively(GameObject item, ISpeckleConverter converter, CancellationToken token)
+		{
+			var @base = new Base();
+
+			if (token.IsCancellationRequested || item == null)
+				return @base;
+
+			if (converter.CanConvertToSpeckle(item))
+				@base = converter.ConvertToSpeckle(item);
+
+			if (CheckForChildren(item, converter, token, out var objs))
+				@base["@Objects"] = objs;
+
+			return @base;
+		}
+
+		private static bool CheckForChildren(GameObject go, ISpeckleConverter converter, CancellationToken token, out List<Base> objs)
 		{
 			objs = new List<Base>();
 
@@ -144,7 +190,7 @@ namespace Speckle.ConnectorUnity.Ops
 				{
 					if (token.IsCancellationRequested)
 						return false;
-					
+
 					var converted = ConvertRecursively(child.gameObject, converter, token);
 					if (converted != null)
 						objs.Add(converted);
