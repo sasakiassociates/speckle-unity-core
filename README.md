@@ -29,7 +29,7 @@ This pacakge can be installed with [OpenUpm](https://github.com/openupm/openupm-
 | ~1.0.6~   | ~Sending Async Commands for Editor and Runtime with Speckle Node~|
 | ~1.0.7~   | ~Speckle Node and Layer object for maintaing commit data~ |
 | 1.0.8     | Editor Support for Speckle Node and Speckle Layers|
-| 1.0.9     | Buffer Preview for Display Meshes |
+| 1.0.9     | Tree and List support for Speckle Node |
 | 1.1.0     | Client Subscriptions as Unity Events |
 
 
