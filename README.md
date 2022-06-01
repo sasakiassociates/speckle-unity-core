@@ -16,10 +16,21 @@ This pacakge can be installed with [OpenUpm](https://github.com/openupm/openupm-
 
 `openupm add com.speckle.core`
 
-
 ## Roadmap
+>These pacakges are in active development, please be aware of any breaking changes if you plan on using this pacakge.
 
-All roadmap information is available in the main package repo, [speckle-unity-connector](https://github.com/sasakiassociates/speckle-unity-connector)  
+| Version | Defining Feature|
+| ------- | -------------------------------------------------------------------------------- |
+| ~1.0.1~   | ~Package structure~|
+| ~1.0.2~   | ~Deconstruct code from main repo for Converter and Clients~|
+| ~1.0.3~   | ~Receiving Async Commands for Editor and Runtime~|
+| ~1.0.4~   | ~Static commands for client commands~|
+| ~1.0.5~   | ~Receive Speckle Commit as a Speckle Node~ |
+| ~1.0.6~   | ~Sending Async Commands for Editor and Runtime with Speckle Node~|
+| ~1.0.7~   | ~Speckle Node and Layer object for maintaing commit data~ |
+| 1.0.8     | Editor Support for Speckle Node and Speckle Layers|
+| 1.0.9     | Buffer Preview for Display Meshes |
+| 1.1.0     | Client Subscriptions as Unity Events |
 
 
 ## Additional 
