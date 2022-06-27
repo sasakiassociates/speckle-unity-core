@@ -9,6 +9,7 @@ namespace Speckle.ConnectorUnity.Ops
 		public readonly string branch;
 
 		public readonly string id;
+
 		public readonly string message;
 
 		public CommitWrapper(Commit commit)

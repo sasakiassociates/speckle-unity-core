@@ -15,6 +15,7 @@ namespace Speckle.ConnectorUnity.Converter
 		public const string ModelUnits = Units.Meters;
 
 		public bool storeProps = true;
+
 		public bool convertProps = true;
 
 		public abstract bool CanConvertToNative(Base type);
@@ -26,7 +27,8 @@ namespace Speckle.ConnectorUnity.Converter
 		public abstract Type unity_type { get; }
 		public abstract string speckle_type { get; }
 
-		[Serializable] [HideInInspector]
+		[Serializable]
+		[HideInInspector]
 		protected readonly struct ComponentInfo
 		{
 			public readonly string speckleTypeName;
@@ -83,10 +85,7 @@ namespace Speckle.ConnectorUnity.Converter
 		}
 
 		// TODO: this is silly, probably a much smarter way of handling this 
-		public override bool CanConvertToNative(Base type)
-		{
-			return type != null && type.GetType() == typeof(TBase);
-		}
+		public override bool CanConvertToNative(Base type) => type != null && type.GetType() == typeof(TBase);
 
 		public override bool CanConvertToSpeckle(Component type) => type != null && type.GetType() == typeof(TComponent);
 
@@ -116,15 +115,9 @@ namespace Speckle.ConnectorUnity.Converter
 			return root;
 		}
 
-		public override Base ToSpeckle(Component component)
-		{
-			return CanConvertToSpeckle(component) ? ConvertComponent((TComponent)component) : null;
-		}
+		public override Base ToSpeckle(Component component) => CanConvertToSpeckle(component) ? ConvertComponent((TComponent)component) : null;
 
-		protected TComponent BuildGo(string goName = null)
-		{
-			return new GameObject(string.IsNullOrEmpty(goName) ? speckle_type : goName).AddComponent<TComponent>();
-		}
+		protected TComponent BuildGo(string goName = null) => new GameObject(string.IsNullOrEmpty(goName) ? speckle_type : goName).AddComponent<TComponent>();
 	}
 
 }

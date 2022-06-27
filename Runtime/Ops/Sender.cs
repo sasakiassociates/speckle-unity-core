@@ -19,11 +19,11 @@ namespace Speckle.ConnectorUnity.Ops
 	public class Sender : SpeckleClient
 	{
 
-		[SerializeField] private string commitMessage;
+		[SerializeField] string commitMessage;
 
 		public UnityAction<string> onDataSent;
 
-		private ServerTransport transport;
+		ServerTransport transport;
 
 		public async UniTask<string> Send(SpeckleNode obj, string message = null, CancellationTokenSource tokenSource = null)
 		{
@@ -39,7 +39,7 @@ namespace Speckle.ConnectorUnity.Ops
 
 			if (!IsReady())
 			{
-				SpeckleUnity.Console.Warn($"{this.name} is not ready");
+				SpeckleUnity.Console.Warn($"{name} is not ready");
 				return objectId;
 			}
 
@@ -61,21 +61,21 @@ namespace Speckle.ConnectorUnity.Ops
 
 				objectId = await Operations.Send(
 					data,
-					this.GetCancellationTokenOnDestroy(),
-					new List<ITransport>() { transport },
-					useDefaultCache: true,
-					onProgressAction: onProgressReport,
-					onErrorAction: onErrorReport,
-					disposeTransports: false
-				).AsUniTask();
+					token,
+					new List<ITransport>
+						{ transport },
+					true,
+					onProgressReport,
+					onErrorReport
+				);
 
 				Debug.Log($"data sent! {objectId}");
 
 				Debug.Log($"Commit to {branch.name}");
 
 				var commitId = await client.CommitCreate(
-					this.GetCancellationTokenOnDestroy(),
-					new CommitCreateInput()
+					token,
+					new CommitCreateInput
 					{
 						objectId = objectId,
 						streamId = stream.Id,
@@ -83,21 +83,22 @@ namespace Speckle.ConnectorUnity.Ops
 						message = message.Valid() ? message : commitMessage.Valid() ? commitMessage : $"Objects from Unity {data.totalChildrenCount}",
 						sourceApplication = SpeckleUnity.HostApp,
 						totalChildrenCount = (int)data.GetTotalChildrenCount()
-					}).AsUniTask();
+					});
 
 				//TODO: point to new commit 
 				Debug.Log($"commit created! {commitId}");
 
-				transport?.Dispose();
 				onDataSent?.Invoke(objectId);
 
 				await UniTask.Yield();
 			}
-
-			catch
-				(SpeckleException e)
+			catch (SpeckleException e)
 			{
 				SpeckleUnity.Console.Exception(e);
+			}
+			finally
+			{
+				transport?.Dispose();
 			}
 
 			return objectId;
@@ -112,9 +113,8 @@ namespace Speckle.ConnectorUnity.Ops
 		protected override async UniTask LoadStream()
 		{
 			await base.LoadStream();
-			
+
 			name = nameof(Sender) + $"-{stream.Id}";
 		}
-
 	}
 }

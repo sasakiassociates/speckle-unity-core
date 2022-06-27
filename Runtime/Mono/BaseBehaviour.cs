@@ -12,6 +12,9 @@ namespace Speckle.ConnectorUnity.Mono
 	public class BaseBehaviour : MonoBehaviour
 	{
 
+		[SerializeField] [HideInInspector]
+		protected SpeckleProperties _properties;
+
 		protected virtual HashSet<string> excludedProps
 		{
 			get
@@ -22,9 +25,6 @@ namespace Speckle.ConnectorUnity.Mono
 					).Select(x => x.Name));
 			}
 		}
-
-		[SerializeField, HideInInspector]
-		protected SpeckleProperties _properties;
 
 		public SpeckleProperties properties
 		{

@@ -13,12 +13,17 @@ namespace Speckle.ConnectorUnity.Ops
 	public struct MetaData
 	{
 		public readonly string branchName;
+
 		public readonly string commitId;
 
 		public readonly string description;
+
 		public readonly string id;
+
 		public readonly string objectId;
+
 		public readonly string serverUrl;
+
 		public readonly string streamName;
 
 		public MetaData(SpeckleStream obj)
@@ -37,20 +42,27 @@ namespace Speckle.ConnectorUnity.Ops
 	public class SpeckleStream : ScriptableObject
 	{
 
-		[SerializeField] private string description;
-		[SerializeField] private string streamName;
-		[SerializeField] private string serverUrl;
-		[SerializeField] private string id;
-		[SerializeField] private string branchName;
-		[SerializeField] private string commitId;
-		[SerializeField] private string objectId;
+		[SerializeField] string description;
 
-		[SerializeField] private string originalInput;
+		[SerializeField] string streamName;
 
-		[SerializeField] private List<BranchWrapper> _branches;
-		[SerializeField] private List<CommitWrapper> _commits;
+		[SerializeField] string serverUrl;
 
-		private StreamWrapper _wrapper;
+		[SerializeField] string id;
+
+		[SerializeField] string branchName;
+
+		[SerializeField] string commitId;
+
+		[SerializeField] string objectId;
+
+		[SerializeField] string originalInput;
+
+		[SerializeField] List<BranchWrapper> _branches;
+
+		[SerializeField] List<CommitWrapper> _commits;
+
+		StreamWrapper _wrapper;
 
 		public StreamWrapper Wrapper
 		{
@@ -102,7 +114,7 @@ namespace Speckle.ConnectorUnity.Ops
 			get => Wrapper.Type;
 		}
 
-		public MetaData getMetaData() => new MetaData(this);
+		public MetaData getMetaData() => new(this);
 
 		/// <summary>
 		///   Initialize a simple stream object that connects the stream wrapper data to the editor
@@ -162,17 +174,18 @@ namespace Speckle.ConnectorUnity.Ops
 			{
 				client.Dispose();
 			}
+
 			return _wrapper.IsValid;
 		}
 
-		private bool Setup()
+		bool Setup()
 		{
 			if (_wrapper?.IsValid == false)
 			{
 				SpeckleUnity.Console.Log("Invalid input for stream");
 				return false;
 			}
-			
+
 			id = _wrapper.StreamId;
 			commitId = _wrapper.CommitId;
 			objectId = _wrapper.ObjectId;
@@ -233,6 +246,7 @@ namespace Speckle.ConnectorUnity.Ops
 				SpeckleUnity.Console.Warn(www.error);
 				return null;
 			}
+
 			return DownloadHandlerTexture.GetContent(www);
 		}
 	}

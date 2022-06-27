@@ -17,31 +17,46 @@ namespace Speckle.ConnectorUnity
 	public class OperationTests : MonoBehaviour
 	{
 
-		private struct TestStream
-		{
-			public string stream;
-			public string commit;
-		}
-
-		private static TestStream RC_1 = new TestStream()
+		static TestStream RC_1 = new()
 		{
 			stream = "89ef27f57b",
 			commit = "884906295a"
 		};
 
-		private static TestStream RC_2 = new TestStream()
+		static TestStream RC_2 = new()
 		{
 			stream = "89ef27f57b",
 			commit = "162ee5f3f5"
 		};
 
-		private static TestStream Carlos = new TestStream()
+		static TestStream Carlos = new()
 		{
 			stream = "00613d79b2",
 			commit = "a852ab79fb"
 		};
 
-		private async UniTask ChainedCommand(TestStream stream)
+		bool isWorking;
+
+		public void OnGUI()
+		{
+			if (GUI.Button(new Rect(10f, 40f, 100f, 20f), "Speckle Test") && !isWorking)
+			{
+				Debug.Log($"Processor Count {Environment.ProcessorCount}");
+				TaskPool.SetMaxPoolSize(3);
+				isWorking = true;
+				// UniTask.WhenAll(ChainedCommand(Carlos));
+				ChainedCommand(Carlos).Forget();
+			}
+
+			if (GUI.Button(new Rect(10f, 70f, 100f, 20f), "Empty Test") && !isWorking)
+			{
+				TaskPool.SetMaxPoolSize(Environment.ProcessorCount);
+				isWorking = true;
+				Receive().Forget();
+			}
+		}
+
+		async UniTask ChainedCommand(TestStream stream)
 		{
 			Debug.Log("Start");
 			isWorking = true;
@@ -65,7 +80,7 @@ namespace Speckle.ConnectorUnity
 			Debug.Log("Object Recieved-" + watch.Elapsed);
 		}
 
-		private async UniTask<Commit> GetCommit(Client client, TestStream s, CancellationToken token)
+		async UniTask<Commit> GetCommit(Client client, TestStream s, CancellationToken token)
 		{
 			var commit = await client.CommitGet(token, s.stream, s.commit).AsUniTask();
 
@@ -74,7 +89,7 @@ namespace Speckle.ConnectorUnity
 			return commit;
 		}
 
-		private async UniTask<Base> GetObject(Client client, string refObj, TestStream s, CancellationToken token)
+		async UniTask<Base> GetObject(Client client, string refObj, TestStream s, CancellationToken token)
 		{
 			var transport = new ServerTransport(client.Account, s.stream);
 
@@ -83,8 +98,6 @@ namespace Speckle.ConnectorUnity
 			transport.Dispose();
 			return obj;
 		}
-
-		private bool isWorking;
 
 		public async UniTask Receive()
 		{
@@ -153,23 +166,11 @@ namespace Speckle.ConnectorUnity
 			return res;
 		}
 
-		public void OnGUI()
+		struct TestStream
 		{
-			if (UnityEngine.GUI.Button(new Rect(10f, 40f, 100f, 20f), "Speckle Test") && !isWorking)
-			{
-				Debug.Log($"Processor Count {Environment.ProcessorCount}");
-				TaskPool.SetMaxPoolSize(3);
-				isWorking = true;
-				// UniTask.WhenAll(ChainedCommand(Carlos));
-				ChainedCommand(Carlos).Forget();
-			}
-			if (UnityEngine.GUI.Button(new Rect(10f, 70f, 100f, 20f), "Empty Test") && !isWorking)
-			{
-				TaskPool.SetMaxPoolSize(Environment.ProcessorCount);
-				isWorking = true;
-				Receive().Forget();
-			}
-		}
+			public string stream;
 
+			public string commit;
+		}
 	}
 }

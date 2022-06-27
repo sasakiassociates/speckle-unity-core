@@ -3,7 +3,6 @@ using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using Cysharp.Threading.Tasks;
-using Speckle.ConnectorUnity.Converter;
 using Speckle.Core.Api;
 using Speckle.Core.Models;
 using Speckle.Core.Transports;
@@ -38,8 +37,6 @@ namespace Speckle.ConnectorUnity.Ops
 				sourceApplication = SpeckleUnity.HostApp
 			});
 		}
-
-	
 
 		public static async UniTask<Base> GetCommitData(SpeckleStream stream, Client client, CancellationToken token)
 		{
@@ -101,7 +98,6 @@ namespace Speckle.ConnectorUnity.Ops
 
 			return @base;
 		}
-
 	}
 
 }

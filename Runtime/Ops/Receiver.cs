@@ -5,7 +5,6 @@ using Cysharp.Threading.Tasks;
 using Speckle.Core.Api;
 using Speckle.Core.Api.SubscriptionModels;
 using Speckle.Core.Logging;
-using Speckle.Core.Models;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -20,13 +19,17 @@ namespace Speckle.ConnectorUnity.Ops
 	[AddComponentMenu("Speckle/Receiver")]
 	public class Receiver : SpeckleClient
 	{
-		[SerializeField] private bool autoReceive;
-		[SerializeField] private bool deleteOld = true;
-		[SerializeField] private Texture preview;
-		[SerializeField] private int commitIndex;
+		[SerializeField] bool autoReceive;
 
-		[SerializeField] private bool showPreview = true;
-		[SerializeField] private bool renderPreview = true;
+		[SerializeField] bool deleteOld = true;
+
+		[SerializeField] Texture preview;
+
+		[SerializeField] int commitIndex;
+
+		[SerializeField] bool showPreview = true;
+
+		[SerializeField] bool renderPreview = true;
 
 		public Action<GameObject> onDataReceivedAction;
 
@@ -36,7 +39,6 @@ namespace Speckle.ConnectorUnity.Ops
 		}
 
 		public List<Commit> Commits { get; protected set; }
-		
 
 		public Commit activeCommit
 		{
@@ -49,7 +51,7 @@ namespace Speckle.ConnectorUnity.Ops
 			set => showPreview = value;
 		}
 
-		private void OnDestroy()
+		void OnDestroy()
 		{
 			client?.CommitCreatedSubscription?.Dispose();
 		}
@@ -77,7 +79,7 @@ namespace Speckle.ConnectorUnity.Ops
 			}
 		}
 
-		private async UniTask UpdatePreview()
+		async UniTask UpdatePreview()
 		{
 			if (stream == null || !stream.IsValid())
 				await UniTask.Yield();
@@ -131,7 +133,7 @@ namespace Speckle.ConnectorUnity.Ops
 				}
 
 				// get the reference object from the commit
-				Base @base = await this.GetCommitData();
+				var @base = await this.GetCommitData();
 
 				if (@base == null)
 				{
@@ -181,8 +183,6 @@ namespace Speckle.ConnectorUnity.Ops
 		// 	return new ReadOnlyCollection<DisplayMesh>(buffer);
 		// }
 
-	
-
 		public void RenderPreview(bool render)
 		{
 			renderPreview = render;
@@ -197,6 +197,7 @@ namespace Speckle.ConnectorUnity.Ops
 		public readonly struct DisplayMesh
 		{
 			public readonly Vector3[] verts;
+
 			public readonly int[] tris;
 
 			public DisplayMesh(Vector3[] verts, int[] tris)
@@ -209,6 +210,7 @@ namespace Speckle.ConnectorUnity.Ops
 
 		#region Subscriptions
 		public UnityAction<CommitInfo> OnCommitCreated;
+
 		public UnityAction<CommitInfo> OnCommitUpdated;
 		#endregion
 

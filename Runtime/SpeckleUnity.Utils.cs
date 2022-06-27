@@ -7,6 +7,7 @@ using Speckle.ConnectorUnity.Ops;
 using Speckle.Core.Kits;
 using Speckle.Core.Models;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace Speckle.ConnectorUnity
 {
@@ -24,19 +25,16 @@ namespace Speckle.ConnectorUnity
 
 		public static bool Valid(this string name) => !string.IsNullOrEmpty(name);
 
-		public static void SafeDestroy(UnityEngine.Object obj)
+		public static void SafeDestroy(Object obj)
 		{
 			if (Application.isPlaying)
-				UnityEngine.Object.Destroy(obj);
+				Object.Destroy(obj);
 
 			else
-				UnityEngine.Object.DestroyImmediate(obj);
+				Object.DestroyImmediate(obj);
 		}
 
-		public static bool IsList(this object @object)
-		{
-			return @object != null && @object.GetType().IsList();
-		}
+		public static bool IsList(this object @object) => @object != null && @object.GetType().IsList();
 
 		public static bool IsList(this Type type)
 		{
@@ -65,21 +63,15 @@ namespace Speckle.ConnectorUnity
 			return @base != null;
 		}
 
-		public static void ConvertToLayer(this SpeckleLayer layer, Base obj, ISpeckleConverter converter)
+		public static void Add(this SpeckleLayer layer, Base obj, ISpeckleConverter converter)
 		{
 			if (converter.ConvertToNative(obj) is GameObject o)
 				layer.Add(o);
 			else
-				Debug.Log("Did not convert correctly");
+				Debug.Log("Checking for layers");
 		}
 
-		public static void ConvertToLayer(this SpeckleLayer layer, object obj, ISpeckleConverter converter)
-		{
-			if (obj.IsBase(out var @base))
-				ConvertToLayer(layer, @base, converter);
-		}
-		
-		 public static SpeckleLayer ListToLayer(
+		public static SpeckleLayer ListToLayer(
 			string member,
 			IEnumerable<object> data,
 			ISpeckleConverter converter,
@@ -100,10 +92,7 @@ namespace Speckle.ConnectorUnity
 
 				if (item.IsBase(out var @base))
 				{
-					if (converter.CanConvertToNative(@base) && converter.ConvertToNative(@base) is GameObject o)
-					{
-						layer.Add(o);
-					}
+					if (converter.CanConvertToNative(@base) && converter.ConvertToNative(@base) is GameObject o) layer.Add(o);
 				}
 				else if (item.IsList())
 				{
@@ -112,7 +101,9 @@ namespace Speckle.ConnectorUnity
 					layer.Add(childLayer);
 				}
 				else
+				{
 					onError?.Invoke($"Cannot handle this type of object {item.GetType()}");
+				}
 			}
 
 			if (parent != null)
@@ -122,6 +113,5 @@ namespace Speckle.ConnectorUnity
 
 			return layer;
 		}
-
 	}
 }

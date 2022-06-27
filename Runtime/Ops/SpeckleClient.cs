@@ -17,7 +17,6 @@ namespace Speckle.ConnectorUnity.Ops
 	public interface ISpeckleInstance : ISpeckleStream, ISpeckleClient, IveMadeProgress
 	{
 		public UniTask<bool> SetStream(SpeckleStream stream);
-
 	}
 
 	public interface ISpeckleStream
@@ -41,15 +40,18 @@ namespace Speckle.ConnectorUnity.Ops
 	{
 
 		[SerializeField] protected SpeckleNode _root;
+
 		[SerializeField] protected SpeckleStream _stream;
+
 		[SerializeField] protected List<ScriptableSpeckleConverter> _converters;
 
-		[SerializeField] private float progressAmount;
+		[SerializeField] float progressAmount;
 
 		public int branchIndex;
+
 		public int converterIndex;
 
-		private List<Branch> _branches = new List<Branch>();
+		List<Branch> _branches = new();
 
 		/// <summary>
 		///   a disposable speckle client that we use to access speckly things
@@ -107,12 +109,12 @@ namespace Speckle.ConnectorUnity.Ops
 			SetStream(stream).Forget();
 		}
 
-		private void OnDisable()
+		void OnDisable()
 		{
 			CleanUp();
 		}
 
-		private void OnDestroy()
+		void OnDestroy()
 		{
 			CleanUp();
 		}
@@ -172,7 +174,7 @@ namespace Speckle.ConnectorUnity.Ops
 		public float progress
 		{
 			get => progressAmount;
-			set { progressAmount = value; }
+			set => progressAmount = value;
 		}
 
 		public event Action onRepaint;
@@ -253,6 +255,5 @@ namespace Speckle.ConnectorUnity.Ops
 		{
 			client?.Dispose();
 		}
-
 	}
 }

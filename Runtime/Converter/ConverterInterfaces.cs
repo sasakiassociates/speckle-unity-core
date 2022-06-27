@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using Speckle.Core.Models;
 using UnityEngine;
 
@@ -10,7 +9,6 @@ namespace Speckle.ConnectorUnity.Converter
 	{
 
 		public string speckle_type { get; }
-
 		public Type unity_type { get; }
 
 		public bool CanConvertToNative(Base type);

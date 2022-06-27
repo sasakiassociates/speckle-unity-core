@@ -2,7 +2,7 @@ name: Update issue Status
 
 on:
   issues:
-    types: [closed]
+    types: [ closed ]
 
 jobs:
   update_issue:
@@ -54,7 +54,7 @@ jobs:
             }' -f project=$PROJECT_ID -f id=$ISSUE_ID --jq '.data.addProjectNextItem.projectNextItem.id')"
           
           echo 'ITEM_ID='$item_id >> $GITHUB_ENV
-          
+
       - name: Update Status
         env:
           GITHUB_TOKEN: ${{secrets.GHPROJECT_TOKEN}}

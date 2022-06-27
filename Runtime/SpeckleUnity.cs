@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using Speckle.Core.Kits;
 using UnityEngine;
@@ -16,26 +15,6 @@ namespace Speckle.ConnectorUnity
 
 		public const string NameSpace = "Speckle";
 
-		public static class Console
-		{
-			public const string title = "speckle-connector:";
-
-			public static void Log(string msg)
-			{
-				Debug.Log(title + " " + msg);
-			}
-			
-			public static void Exception(Exception exception)
-			{
-				Debug.LogException(exception);
-			}
-			
-			public static void Warn(string message)
-			{
-				Debug.LogWarning(title + message);
-			}
-		}
-
 		#if UNITY_EDITOR
 		public static List<T> GetAllInstances<T>() where T : ScriptableObject
 		{
@@ -46,8 +25,29 @@ namespace Speckle.ConnectorUnity
 				var path = AssetDatabase.GUIDToAssetPath(g);
 				items.Add(AssetDatabase.LoadAssetAtPath<T>(path));
 			}
+
 			return items;
 		}
 		#endif
+
+		public static class Console
+		{
+			public const string title = "speckle-connector:";
+
+			public static void Log(string msg)
+			{
+				Debug.Log(title + " " + msg);
+			}
+
+			public static void Exception(Exception exception)
+			{
+				Debug.LogException(exception);
+			}
+
+			public static void Warn(string message)
+			{
+				Debug.LogWarning(title + message);
+			}
+		}
 	}
 }

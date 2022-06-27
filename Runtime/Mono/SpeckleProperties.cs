@@ -3,7 +3,6 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Linq;
-using Cysharp.Threading.Tasks;
 using Speckle.Core.Api;
 using Speckle.Core.Models;
 using UnityEngine;
@@ -19,10 +18,11 @@ namespace Speckle.ConnectorUnity.Mono
 	{
 
 		[SerializeField] [HideInInspector]
-		private string _serializedData = "";
-		private ObservableConcurrentDictionary<string, object> _data;
+		string _serializedData = "";
 
-		private bool _hasChanged;
+		ObservableConcurrentDictionary<string, object> _data;
+
+		bool _hasChanged;
 
 		public SpeckleProperties()
 		{
@@ -63,13 +63,13 @@ namespace Speckle.ConnectorUnity.Mono
 			Data = @base.GetMembers().Where(x => !excludedProps.Contains(x.Key)).ToDictionary(x => x.Key, x => x.Value);
 		}
 
-		private void CollectionChangeHandler(object sender, NotifyCollectionChangedEventArgs e)
+		void CollectionChangeHandler(object sender, NotifyCollectionChangedEventArgs e)
 		{
 			_hasChanged = true;
 		}
 
 		[Serializable]
-		private class SpeckleData : Base
+		class SpeckleData : Base
 		{
 			public SpeckleData(IDictionary<string, object> data)
 			{

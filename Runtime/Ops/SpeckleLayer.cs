@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
@@ -8,37 +7,47 @@ namespace Speckle.ConnectorUnity.Ops
 	public class SpeckleLayer : MonoBehaviour
 	{
 
-		[SerializeField] private Transform _parent;
-		[SerializeField] private List<GameObject> _data;
-		[SerializeField] private List<SpeckleLayer> _layers;
+		[SerializeField] Transform _parent;
+
+		[SerializeField] List<GameObject> _data;
+
+		[SerializeField] List<SpeckleLayer> _layers;
 
 		/// <summary>
-		/// Active parent for all layer objects
+		///   Active parent for all layer objects
 		/// </summary>
-		public Transform Parent => _parent;
-
-		/// <summary>
-		/// Converted object data within layer
-		/// </summary>
-		public List<GameObject> Data => _data.Valid() ? _data : new List<GameObject>();
-
-		/// <summary>
-		/// Layer Name
-		/// </summary>
-		public string LayerName
+		public Transform Parent
 		{
-			get => this.name;
-			set => this.name = value;
+			get => _parent;
 		}
 
 		/// <summary>
-		/// Nested Layers
+		///   Converted object data within layer
 		/// </summary>
-		public List<SpeckleLayer> Layers => _layers.Valid() ? _layers : new List<SpeckleLayer>();
-		
+		public List<GameObject> Data
+		{
+			get => _data.Valid() ? _data : new List<GameObject>();
+		}
 
 		/// <summary>
-		/// Set parent for all objects in a layer
+		///   Layer Name
+		/// </summary>
+		public string LayerName
+		{
+			get => name;
+			set => name = value;
+		}
+
+		/// <summary>
+		///   Nested Layers
+		/// </summary>
+		public List<SpeckleLayer> Layers
+		{
+			get => _layers.Valid() ? _layers : new List<SpeckleLayer>();
+		}
+
+		/// <summary>
+		///   Set parent for all objects in a layer
 		/// </summary>
 		/// <param name="t"></param>
 		public void SetObjectParent(Transform t)
@@ -63,8 +72,5 @@ namespace Speckle.ConnectorUnity.Ops
 			_data ??= new List<GameObject>();
 			_data.Add(@object);
 		}
-
-		
-		
 	}
 }

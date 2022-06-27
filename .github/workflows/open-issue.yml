@@ -2,7 +2,7 @@ name: Move new issues into Project
 
 on:
   issues:
-    types: [opened]
+    types: [ opened ]
 
 jobs:
   track_issue:
@@ -32,7 +32,7 @@ jobs:
 
           echo 'PROJECT_ID='$(jq '.data.organization.projectNext.id' project_data.json) >> $GITHUB_ENV
           echo 'STATUS_FIELD_ID='$(jq '.data.organization.projectNext.fields.nodes[] | select(.name== "Status") | .id' project_data.json) >> $GITHUB_ENV
-     
+
       - name: Add Issue to project
         env:
           GITHUB_TOKEN: ${{secrets.GHPROJECT_TOKEN}}
